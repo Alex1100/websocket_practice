@@ -6,6 +6,8 @@ import (
 	"golang.org/x/net/websocket"
 	"log"
 	"os"
+	"strings"
+	// "strconv"
 )
 
 func initAllConnections() {
@@ -125,9 +127,30 @@ func readExchangeMessages(ws *websocket.Conn, incomingMessages chan string, u st
 				log.Fatal(err)
 			}
 
-			hitbtcMessage := map[string]interface{}{"symbol": hitbtcResponse.MarketDataIncrementalRefresh.Symbol, "exchangeStatus": hitbtcResponse.MarketDataIncrementalRefresh.ExchangeStatus, "ask": hitbtcResponse.MarketDataIncrementalRefresh.Ask, "bid": hitbtcResponse.MarketDataIncrementalRefresh.Bid, "trade": hitbtcResponse.MarketDataIncrementalRefresh.Trade, "timestamp": hitbtcResponse.MarketDataIncrementalRefresh.Timestamp}
+			// var pricesInterface []string
 
-			fmt.Printf("NEW INTERFACE IS: %s", hitbtcMessage)
+			askPrices := make([]string, len(hitbtcResponse.MarketDataIncrementalRefresh.Ask))
+			fmt.Printf("LENGTH OF NEW ARR IS: %d", len(askPrices))
+			for _, price := range hitbtcResponse.MarketDataIncrementalRefresh.Ask {
+				if price.Price != "" || price.Price != " " {
+					quote := strings.Trim(price.Price, " {")
+					quot := strings.Trim(quote, "}")
+					askPrices = append(askPrices, quot)
+				}
+			}
+
+			hitbtcMessage := map[string]interface{}{
+				"symbol":         hitbtcResponse.MarketDataIncrementalRefresh.Symbol,
+				"exchangeStatus": hitbtcResponse.MarketDataIncrementalRefresh.ExchangeStatus,
+				"ask":            hitbtcResponse.MarketDataIncrementalRefresh.Ask,
+				"bid":            hitbtcResponse.MarketDataIncrementalRefresh.Bid,
+				"trade":          hitbtcResponse.MarketDataIncrementalRefresh.Trade,
+				"timestamp":      hitbtcResponse.MarketDataIncrementalRefresh.Timestamp}
+
+			fmt.Println("\n\nNEW INTERFACE IS: ", hitbtcMessage)
+			fmt.Printf("\n\nSYMBOL IS: %s", hitbtcMessage["symbol"])
+			fmt.Println("\n\nZE STUFF IS: ", askPrices)
+			fmt.Println("\n\nASK PRICES ARE: ", hitbtcResponse.MarketDataIncrementalRefresh.Ask)
 		}
 		//  else {
 		// 	if err := json.NewDecoder(ws).Decode(geminiResponse); err != nil {
